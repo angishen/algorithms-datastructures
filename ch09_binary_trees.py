@@ -92,7 +92,7 @@ def lca(tree, node0, node1):
 
 	return lca_helper(tree, node0, node1).ancestor
 
-# COMPUTE LCA WHEN NODES HAVE PARENT POINTERS
+# 9.4 COMPUTE LCA WHEN NODES HAVE PARENT POINTERS
 def lca_with_parents(node0, node1):
 	node_hash = {}
 	while node0:
@@ -126,25 +126,70 @@ def lca_with_parents_BOOK(node0, node1):
 
 		return node0
 
+# 9.5 SUM THE ROOT TO LEAF PATHS IN A BINARY TREE
+def sum_root_to_leaf_BOOK(tree, partial_path_sum=0):
+	if not tree:
+		return 0
+	partial_path_sum = partial_path_sum * 2 + tree.data
+	if not tree.left and not tree.right:
+		return partial_path_sum
+	return (sum_root_to_leaf(tree.left, partial_path_sum) +
+			sum_root_to_leaf(tree.right, partial_path_sum))
+
+# 9.6 FIND A ROOT TO LEAF PATH WITH A SPECIFIED SUM
+def has_specified_sum(tree, int):
+	def check_path_sum(tree, int, path_sum=0):
+		if not tree: 
+			return False
+		if not tree.left and not tree.right:
+			return path_sum == int
+		return (check_path_sum(tree.left, int, path_sum) or 
+			   check_path_sum(tree.right, int, path_sum))
+	return check_path_sum(tree, int, path_sum=0)
+
+def has_path_sum_BOOK(tree, remaining_weight):
+	if not tree:
+		return False
+	if not tree.left and not tree.right:
+		return tree.data == remaining_weight
+	return (has_path_sum_BOOK(tree.left, remaining_weight-tree.data) or 
+			has_path_sum_BOOK(tree.right, remaining_weight-tree.data))
+
+
 def main():
-	node8 = BinaryTreeNode(8)
-	node7 = BinaryTreeNode(7)
-	node6 = BinaryTreeNode(6, node7)
-	node5 = BinaryTreeNode(5, right=node6)
+	node2 = BinaryTreeNode(2)
+	node10 = BinaryTreeNode(10)
+	node8 = BinaryTreeNode(8, right=node2)
+	node6 = BinaryTreeNode(6, right=node10)
+	node5 = BinaryTreeNode(5)
+	node19 = BinaryTreeNode(19, node8)
 	node4 = BinaryTreeNode(4)
-	node3 = BinaryTreeNode(3, node4, node5)
-	node2 = BinaryTreeNode(2, node3)
-	root = BinaryTreeNode(1, node2, node8)
+	node12 = BinaryTreeNode(12, node5, node6)
+	node1 = BinaryTreeNode(1, node4, node19)
+	root = BinaryTreeNode(10, node1, node12)
 
-	node7.parent = node6
-	node6.parent = node5
-	node5.parent = node3
-	node4.parent = node3
-	node3.parent = node2
-	node2.parent = root
-	node8.parent = root
+	print(has_path_sum_BOOK(root, 40))
+	print(has_specified_sum(root, 40))
 
-	print(lca_with_parents(node4, node7))
+
+	# node8 = BinaryTreeNode(8)
+	# node7 = BinaryTreeNode(7)
+	# node6 = BinaryTreeNode(6, node7)
+	# node5 = BinaryTreeNode(5, right=node6)
+	# node4 = BinaryTreeNode(4)
+	# node3 = BinaryTreeNode(3, node4, node5)
+	# node2 = BinaryTreeNode(2, node3)
+	# root = BinaryTreeNode(1, node2, node8)
+
+	# node7.parent = node6
+	# node6.parent = node5
+	# node5.parent = node3
+	# node4.parent = node3
+	# node3.parent = node2
+	# node2.parent = root
+	# node8.parent = root
+
+	# print(lca_with_parents(node4, node7))
 
 	# node9 = BinaryTreeNode(9)
 	# node8 = BinaryTreeNode(8)
