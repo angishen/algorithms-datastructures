@@ -155,21 +155,99 @@ def has_path_sum_BOOK(tree, remaining_weight):
 	return (has_path_sum_BOOK(tree.left, remaining_weight-tree.data) or 
 			has_path_sum_BOOK(tree.right, remaining_weight-tree.data))
 
+# 9.7 IMPLEMENT IN ORDER TRAVERSAL WITHOUT RECURSION
+def inorder_iterative(tree):
+	result = []
+	stack = []
+	while tree or stack:
+		if tree:
+			stack.append(tree)
+			tree = tree.left
+		else:
+			tree = stack.pop()
+			result.append(tree.data)
+			tree = tree.right
+	return result
+
+def inorder_recursive(tree):
+	result = []
+	def in_order_helper(tree):
+		if not tree:
+			return
+		in_order_helper(tree.left)
+		result.append(tree.data)
+		in_order_helper(tree.right)
+	in_order_helper(tree)
+	return result
+
+# 9.8 IMPLEMENT PRE ORDER TRAVERSAL WITHOUT RECURSION
+def preorder_iterative(tree):
+	result = []
+	stack = [tree]
+	while stack:
+		curr = stack.pop()
+		if curr:
+			result.append(curr.data)
+			stack.extend([curr.right, curr.left])
+	return result
+
+def preorder_recursive(tree):
+	result = []
+	def preorder_helper(tree):
+		if not tree:
+			return
+		result.append(tree.data)
+		preorder_helper(tree.left)
+		preorder_helper(tree.right)
+	preorder_helper(tree)
+	return result
+
+# 9.9 COMPUTE THE KTH NODE IN AN IN-ORDER TRAVERSAL
+def find_kth_node_binary_tree_BOOK(tree, k):
+	while tree:
+		left_size = tree.left.size if tree.left else 0
+		if left_size + 1 < k: # kth node must be in right subtree of tree
+			k -= left_size + 1
+			tree = tree.right
+		elif left_size == k - 1: # k is the iter itself
+			return tree
+		else: # kth node must be in left subtree of tree
+			tree = tree.left
+	return None # if k is between 1 and the tree size, this is unreachable
+
+# 9.10 COMPUTE THE SUCCESSOR
+def find_successor(node):
+	if node.right:
+		node = node.right
+		while node:
+			node = node.left
+		return node
+
+	while node.parent and node.parent.right is node:
+		node = node.parent
+
+	return node.parent
+
 
 def main():
-	node2 = BinaryTreeNode(2)
-	node10 = BinaryTreeNode(10)
-	node8 = BinaryTreeNode(8, right=node2)
-	node6 = BinaryTreeNode(6, right=node10)
-	node5 = BinaryTreeNode(5)
-	node19 = BinaryTreeNode(19, node8)
-	node4 = BinaryTreeNode(4)
-	node12 = BinaryTreeNode(12, node5, node6)
-	node1 = BinaryTreeNode(1, node4, node19)
-	root = BinaryTreeNode(10, node1, node12)
+	# node2 = BinaryTreeNode(2)
+	# node10 = BinaryTreeNode(10)
+	# node8 = BinaryTreeNode(8, right=node2)
+	# node6 = BinaryTreeNode(6, right=node10)
+	# node5 = BinaryTreeNode(5)
+	# node19 = BinaryTreeNode(19, node8)
+	# node4 = BinaryTreeNode(4)
+	# node12 = BinaryTreeNode(12, node5, node6)
+	# node1 = BinaryTreeNode(1, node4, node19)
+	# root = BinaryTreeNode(10, node1, node12)
 
-	print(has_path_sum_BOOK(root, 40))
-	print(has_specified_sum(root, 40))
+	# print(inorder_iterative(root))
+	# print(inorder_recursive(root))
+	# print(preorder_iterative(root))
+	# print(preorder_recursive(root))
+
+	# print(has_path_sum_BOOK(root, 40))
+	# print(has_specified_sum(root, 40))
 
 
 	# node8 = BinaryTreeNode(8)
