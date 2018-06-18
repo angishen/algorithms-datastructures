@@ -1,3 +1,5 @@
+from ch07_linkedlists import ListNode, print_list_nodes
+
 import collections
 
 class BinaryTreeNode(object):
@@ -228,8 +230,112 @@ def find_successor(node):
 
 	return node.parent
 
+# 9.11 IMPLEMENT AN IN ORDER TRAVERSAL WITH O(1) SPACE
+def inorder_traversal_o1space(tree):
+	# this doesn't work
+	result = []
+	while tree:
+		while tree.left:
+			tree = tree.left
+		result.append(tree.data)
+		tree = tree.parent
+		result.append(tree.data)
+		if tree.right:
+			tree = tree.right
+		else:
+			while tree.parent and tree.parent.right is tree:
+				tree = tree.parent
+			tree = tree.parent
+	return result
 
-def main():
+def inorder_traversal_o1space_BOOK(tree):
+	prev, result = None, []
+	while tree:
+		if prev is tree.parent:
+			if tree.left:
+				next = tree.left
+			else:
+				result.append(tree.data)
+				next = tree.right or tree.parent
+		elif tree.left is prev:
+			result.append(tree.data)
+			next = tree.right or tree.parent
+		else:
+			next = tree.parent
+		prev, tree = tree, next
+	return result
+
+# 9.12 RECONSTRUCT A BINARY TREE FROM TRAVERSAL DATA
+def binary_tree_from_preorder_inorder(preorder, inorder):
+	node_to_inorder_idx = {data: i for i, data in enumerate(inorder)}
+
+	def binary_tree_from_preorder_inorder_helper(preorder_start, preorder_end,
+												 inorder_start, inorder_end):
+		if preorder_end <= preorder_start or inorder_end <= inorder_start:
+			return None
+
+		root_inorder_idx = node_to_inorder_idx[preorder[preorder_start]]
+		left_subtree_size = root_inorder_idx - inorder_start
+
+		return BinaryTreeNode(
+			preorder[preorder_start],
+			binary_tree_from_preorder_inorder_helper(
+				preorder_start + 1, preorder_start + 1 + left_subtree_size,
+				inorder_start, root_inorder_idx),
+			binary_tree_from_preorder_inorder_helper(
+				preorder_start + 1 + left_subtree_size, preorder_end,
+				root_inorder_idx + 1, inorder_end))
+
+	return binary_tree_from_preorder_inorder_helper(0, len(preorder), 0, len(inorder))
+
+# 9.13 RECONSTRUCT A BINARY TREE FROM A PREORDER TRAVERSAL WITH MARKERS
+def reconstruct_preorder(preodrer):
+	def reconstruct_preorder_helper(preorder_iter):
+		subtree_key = next(preorder_iter)
+		if subtree_key is None:
+			return None
+
+		left_subtree = reconstruct_preorder_helper(preorder_iter)
+		right_subtree = reconstruct_preorder_helper(preorder_iter)
+		return BinaryTreeNode(subtree_key, left_subtree, right_subtree)
+
+	return reconstruct_preorder_helper(iter(preorder))
+
+# 9.14 FOM A LINEKD LIST FROM THE LEAVES OF A BINARY TREE
+dummy_head = L = ListNode(0)
+def leaf_nodes_to_linked_list(tree):
+
+	if tree.left is None and tree.right is None:
+		L.next = ListNode(tree.data)
+		L = L.next
+	leaf_nodes_to_linked_list(tree.left)
+	leaf_nodes_to_linked_list(tree.right)
+	return dummy_head.next
+
+def create_list_of_leaves_BOOK(tree):
+	if not tree:
+		return []
+	if not tree.left and not tree.right:
+		return [tree.data]
+	return create_list_of_leaves_BOOK(tree.left) + create_list_of_leaves_BOOK(tree.right)
+
+if __name__ == "__main__":
+	node13 = BinaryTreeNode('m')
+	node12 = BinaryTreeNode('l')
+	node11 = BinaryTreeNode('k')
+	node10 = BinaryTreeNode('j')
+	node9 = BinaryTreeNode('i')
+	node8 = BinaryTreeNode('h')
+	node7 = BinaryTreeNode('g', node12, node13)
+	node6 = BinaryTreeNode('f')
+	node5 = BinaryTreeNode('e', node10, node11)
+	node4 = BinaryTreeNode('d', node8, node9)
+	node3 = BinaryTreeNode('c', node6, node7)
+	node2 = BinaryTreeNode('b', node4, node5)
+	root = BinaryTreeNode('a', node2, node3)
+
+	print(create_list_of_leaves_BOOK(root))
+	# print_list_nodes(linked_list)
 	# node2 = BinaryTreeNode(2)
 	# node10 = BinaryTreeNode(10)
 	# node8 = BinaryTreeNode(8, right=node2)
@@ -277,5 +383,3 @@ def main():
 	# root = BinaryTreeNode(1, node2)
 
 	# print(is_height_balanced(root))
-
-main()
