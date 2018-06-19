@@ -319,22 +319,81 @@ def create_list_of_leaves_BOOK(tree):
 		return [tree.data]
 	return create_list_of_leaves_BOOK(tree.left) + create_list_of_leaves_BOOK(tree.right)
 
+def compute_tree_exterior(tree):
+	left, right = [], []
+	root = tree
+
+	while tree.left is not None and tree.right is not None:
+		left.append(tree.data)
+		tree = tree.left
+
+	tree = root 
+	while tree.left is not None and tree.right is not None:
+		right.append(tree.data)
+		tree = tree.right
+
+	tree = root
+	bottom = create_list_of_leaves_BOOK(tree)
+
+	return left + bottom + list(reversed(right))[:-1]
+
+def exterior_binary_tree_BOOK(tree):
+	def is_leaf(node):
+		return not node.left and not node.right
+
+	def left_boundary_and_leaves(subtree, is_boundary):
+		if not subtree:
+			return []
+		return (([subtree] if is_boundary
+				  or is_leaf(subtree) else []) + left_boundary_and_leaves(
+				  subtree.left, is_boundary) + left_boundary_and_leaves(
+				  subtree.right, is_boundary and not subtree.left))
+
+	def right_boundary_and_leaves(subtree, is_boundary):
+		if not subtree:
+			return []
+		return (right_boundary_and_leaves(subtree.left, is_boundary
+										  and not subtree.right) +
+				right_boundary_and_leaves(subtree.right, is_boundary) + 
+				([subtree] if is_boundary or is_leaf(subtree) else []))
+
+	return ([tree] + left_boundary_and_leaves(tree.left, is_boundary=True) + 
+			right_boundary_and_leaves(tree.right, is_boundary=True)
+			if tree else [])
+
+# 9.16 COMPUTE THE RIGHT SIBLING TREE
+def construct_right_sibling(tree):
+	def populate_children_next_field(start_node):
+		while start_node and start_node.left:
+			# populate right child's next field
+			start_node.left.next = start_node.right
+			# populate right child's next field if iter is not the last node of the level
+			start_node.right.next = start_node.next and start_node.next.left
+			start_node = start_node.next
+
+	while tree and tree.left:
+		populate_children_next_field(tree)
+		tree = tree.left
+
+
 if __name__ == "__main__":
 	node13 = BinaryTreeNode('m')
 	node12 = BinaryTreeNode('l')
 	node11 = BinaryTreeNode('k')
 	node10 = BinaryTreeNode('j')
 	node9 = BinaryTreeNode('i')
-	node8 = BinaryTreeNode('h')
+	# node8 = BinaryTreeNode('h')
 	node7 = BinaryTreeNode('g', node12, node13)
 	node6 = BinaryTreeNode('f')
 	node5 = BinaryTreeNode('e', node10, node11)
-	node4 = BinaryTreeNode('d', node8, node9)
+	node4 = BinaryTreeNode('d', right=node9)
 	node3 = BinaryTreeNode('c', node6, node7)
 	node2 = BinaryTreeNode('b', node4, node5)
 	root = BinaryTreeNode('a', node2, node3)
 
-	print(create_list_of_leaves_BOOK(root))
+	print(compute_tree_exterior(root))
+
+	# print(create_list_of_leaves_BOOK(root))
 	# print_list_nodes(linked_list)
 	# node2 = BinaryTreeNode(2)
 	# node10 = BinaryTreeNode(10)

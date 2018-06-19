@@ -316,7 +316,7 @@ def print_list_nodes(L):
         print(L.data)
         L = L.next
 
-def main():
+if __name__ == "__main__":
 
     node1_3 = ListNode(4)
     node1_2 = ListNode(1, node1_3)
@@ -388,4 +388,3 @@ def main():
     # remove_kth_from_end(node1, 3)
     # print_list_nodes(node1)    
  
-main()
