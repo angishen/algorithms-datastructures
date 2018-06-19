@@ -375,7 +375,6 @@ def construct_right_sibling(tree):
 		populate_children_next_field(tree)
 		tree = tree.left
 
-
 if __name__ == "__main__":
 	node13 = BinaryTreeNode('m')
 	node12 = BinaryTreeNode('l')
