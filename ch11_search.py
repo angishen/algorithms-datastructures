@@ -193,6 +193,69 @@ def find_kth_largest(k, A):
 				left = new_pivot_idx + 1
 	return find_kth(operator.gt)
 
+def find_missing_ip_BOOK(stream):
+	NUM_BUCKET = 1 << 16
+	counter = [0] * NUM_BUCKET
+	stream, stream_copy = itertools.tee(stream)
+	for x in stream:
+		upper_part_x = x >> 16
+		counter[upper_part_x] += 1
+
+	# look for a bucket that contains less than (1 << 16) elements
+	BUCKET_CAPACITY = 1 << 16
+	candidate_bucket = next(i for i, c in enumerate(counter)
+						if c < BUCKET_CAPACITY)
+
+	# finds all IP addresses in he stream whose first 16 bits are equal to
+	# candidate_bucket
+	candidates = [0] * BUCKET_CAPACITY
+	stream = stream_copy
+	for x in stream_copy:
+		upper_part_x = x >> 16
+		if candidate_bucket == upper_part_x:
+			# records the presence of 16 LSB of x
+			lower_part_x = ((1 << 16) - 1) & x
+			candidates[lower_part_x] = 1
+
+	# at least one of the LSB combinations is absent, find it
+	for i, v in enumerate(candidates):
+		if v == 0:
+			return (candidate_bucket << 16) | i
+
+# 11.10 FIND THE DUPLICATE AND MISSING ELEMENTS
+def find_missing_and_duplicate(arr):
+	nums_hash = {}
+	for num in arr:
+		if num not in nums_hash:
+			nums_hash[num] = 1
+		else:
+			duplicate_num = num
+	num_count = len(arr) - 1
+	for i in range(num_count):
+		if i not in nums_hash:
+			missing_num = num
+	return missing_num, duplicate_num
+
+DuplicateAndMissing = collections.namedtuple('DuplicateAndMissing', ('duplicate', 'missing'))
+
+def find_duplicate_missing(A):
+	miss_XOR_dup = functools.reduce(lamda v, i: v ^ i[0] ^ i[1], 
+									enumerate(A), 0)
+
+	differ_bit, miss_or_dup = miss_XOR_dup & (~(miss_XOR_dup - 1)), 0
+	for i, a in enumerate(A):
+		if i & differ_bit:
+			miss_or_dup ^= i
+		if a & differ_bit:
+			miss_or_dup ^= a
+
+	if miss_or_dup in A:
+		return DuplicateAndMissing(miss_or_dup, miss_or_dup ^ miss_XOR_dup)
+	return DuplicateAndMissing(miss_or_dup ^ miss_XOR_dup, miss_or_dup)
+
+
+
+
 if __name__ == "__main__":
 	matrix = [[-1,2,4,4,6],
 			  [1,5,5,9,21],
