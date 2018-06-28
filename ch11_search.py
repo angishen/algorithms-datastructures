@@ -254,8 +254,6 @@ def find_duplicate_missing(A):
 	return DuplicateAndMissing(miss_or_dup ^ miss_XOR_dup, miss_or_dup)
 
 
-
-
 if __name__ == "__main__":
 	matrix = [[-1,2,4,4,6],
 			  [1,5,5,9,21],
