@@ -140,11 +140,170 @@ def find_nearest_repetition_BOOK(paragraph):
 
 		word_to_latest_idx[word] = i
 	return nearest_repeated_distance
-	
+
+# 12.7 FIND THE SMALLEST SUBARRAY
+def find_smallest_subarray_covering_set_BOOK(paragraph, keywords):
+	keywords_to_cover = collections.Counter(keywords)
+	result = (-1, -1)
+	remaining_to_cover = len(keywords)
+	left = 0
+	for right, p in enumerate(paragraph):
+		if p in keywords:
+			keywords_to_cover[p] -= 1 
+			if keywords_to_cover[p] == 0:
+				remaining_to_cover -= 1 
+
+		while remaining_to_cover == 0:
+			if result == (-1, -1) or right - left < result[1] - result[0]:
+				result = (left, right)
+			p1 = paragraph[left]
+			if p1 in keywords:
+				keywords_to_cover[p1] += 1
+				if keywords_to_cover[p1] > 0:
+					remaining_to_cover += 1
+			left += 1
+	return result
+
+def find_smallest_subarray_covering_set_streaming_BOOK(stream, query_strings):
+	class DoublyLinkedList:
+		def __init__(self, data=None):
+			self.data = data
+			self.next = self.prev = None
+
+	class LinkedList:
+		def __init__(self):
+			self.head = self.tail = None
+			self._size = 0
+
+		def __len__(self):
+			return self._size
+
+		def insert_after(self, value):
+			node = DoublyLinkedList(value)
+			node.prev = self.tail
+			if self.tail:
+				self.tail.next = node
+			else:
+				self.head = node
+			self.tail = node
+			self._size += 1 
+
+		def remove(self, node):
+			if node.next: 
+				node.next.prev = node.prev
+			else:
+				self.tail = node.prev
+			if node.prev:
+				node.prev.next = node.next
+			else:
+				self.head = node.next
+			node.next = node.prev = None
+			self._size -= 1 
+
+	loc = LinkedList()
+	d = {s: None for s in query_strings}
+	res = (-1, -1)
+	for idx, s in enumerate(stream):
+		if s in d:
+			it = d[s]
+			if it is not None:
+				loc.remove(it)
+			loc.insert_after(idx)
+			d[s] = loc.tail
+
+			if len(loc) == len(query_strings):
+				if res == (-1, -1) or idx - loc.head.data < res[1] - res[0]:
+					res = (loc.head.data, idx)
+	return res
+
+# 12.8 FIND SMALLEST SUBARRAY SEQUENTIALLY COVERING ALL VALUES
+Subarray = collections.namedtuple('Subarray', ('start', 'end'))
+def find_smallest_sequentially_covering_subset(paragraph, keywords):
+	keyword_to_idx = {k: i for i, k in enumerate(keywords)}
+	latest_occurence = [-1] * len(keywords)
+	shortest_subarray_length = [float('inf')] * len(keywords)
+
+	shortest_distance = float('inf')
+	result = Subarray(-1, -1)
+	for i, p in enumerate(paragraph):
+		if p in keyword_to_idx:
+			keyword_idx = keyword_to_idx[p]
+			if keyword_idx == 0:
+				shortest_subarray_length[keyword_idx] = 1
+			elif shortest_subarray_length[keyword_idx - 1] != float('inf'):
+				distance_to_previous_keyword = (
+					i - latest_occurence[keyword_idx - 1])
+				shortest_subarray_length[keyword_idx] = (
+					distance_to_previous_keyword + 
+					shortest_subarray_length[keyword_idx - 1])
+				latest_occurence[keyword_idx] = i
+			latest_occurence[keyword_idx] = i
+
+			if (keyword_idx == len(keywords) - 1 and 
+					shortest_subarray_length[-1] < shortest_distance):
+				shortest_distance = shortest_subarray_length[-1]
+				result = Subarray(i - shortest_distance + 1, i)
+		print(i, p, latest_occurence, shortest_subarray_length)
+	return result
+
+# 12.9 FIND THE LONGEST SUBARRAY WITH DISTINCT ENTRIES
+def longest_distinct_subarray(arr):
+	start = max_start = 0
+	max_len = float('-inf')
+	letters_seen = {}
+	for i, letter in enumerate(arr):
+		if len(arr) - 1 - i < max_len:
+			return (max_start, max_start + max_len - 1)
+		if letter in letters_seen:
+			start = letters_seen[letter] + 1
+		letters_seen[letter] = i
+		if i - start + 1 > max_len:
+			max_len = i - start + 1
+			max_start = start
+	# return (max_start, max_start + max_len - 1)
+
+def longest_subarray_with_distinct_entries(A):
+	most_recent_occurences = {}
+	longest_dup_free_subarray_start_idx = result = 0
+	for i, a in enumerate(A):
+		if a in most_recent_occurences:
+			dup_idx = most_recent_occurences[a]
+			if dup_idx >= longest_dup_free_subarray_start_idx:
+				result = max(result, i - longest_dup_free_subarray_start_idx)
+				longest_dup_free_subarray_start_idx = dup_idx + 1
+		most_recent_occurences[a] = i
+	return max(result, len(A)-longest_dup_free_subarray_start_idx)
+# 12.10 FIND LENGTH OF THE LONGEST CONTAINED INTERVAL
+def longest_contained_range(A):
+	unprocessed_entries = set(A)
+	max_interval_size = 0
+
+	while unprocessed_entries:
+		a = unprocessed_entries.pop()
+
+		lower_bound = a - 1
+		while lower_bound in unprocessed_entries:
+			unprocessed_entries.remove(lower_bound)
+			lower_bound -= 1 
+
+		upper_bound = a + 1 
+		while upper_bound in unprocessed_entries:
+			unprocessed_entries.remove(upper_bound)
+			upper_bound += 1
+
+		max_interval_size = max(max_interval_size, upper_bound - lower_bound - 1)
+	return max_interval_size
+ 	
 
 if __name__ == "__main__":
-	strings = ['All', 'work', 'and', 'no', 'play', 'makes', 'for', 'no', 'fun', 'and', 'no', 'results']
-	print(get_closest_words(strings))
+	letters = ['f', 's', 'f', 'e', 't', 'w', 'e', 'n', 'w', 'e']
+	print(longest_distinct_subarray(letters))
+	print(longest_subarray_with_distinct_entries(letters))
+	# paragraph = ["what", "the", "fuck", "hello", "banana", "banana", "cucumber", "cat"]
+	# keywords = ["banana", "cat"]
+	# print(find_smallest_sequentially_covering_subset(paragraph, keywords))
+	# strings = ['All', 'work', 'and', 'no', 'play', 'makes', 'for', 'no', 'fun', 'and', 'no', 'results']
+	# print(get_closest_words(strings))
 	# strings = ["beatles", "beatles", "blondie", "fleetwood mac", "blondie", "beatles", "judas priest", "beatles", "blondie"]
 	# print(k_most_frequent_strings(strings, 3))
 	# magazine = "hello my name is angi"
