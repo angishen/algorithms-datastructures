@@ -1,5 +1,7 @@
 import collections
 import re
+import heapq
+import operator
 
 # 12.1 TEST FOR PALINDROMIC PERMUATIONS
 def palindrome_permutation(st):
@@ -293,12 +295,116 @@ def longest_contained_range(A):
 
 		max_interval_size = max(max_interval_size, upper_bound - lower_bound - 1)
 	return max_interval_size
- 	
+
+# 12.11 FIND THE STUDENT WITH THE TOP 3 SCORES
+def get_top_student(score_data):
+	student_scores = collections.defaultdict(list)
+
+	for line in score_data:
+		name, score = line.split()
+		if len(student_scores[name]) < 3:
+			heapq.heappush(student_scores[name], int(score))
+		else:
+			heapq.heappushpop(student_scores[name], int(score))
+
+	return max([(sum(scores), name) for name, scores in student_scores.items()
+					if len(scores) == 3],
+					key = operator.itemgetter(0),
+					default = 'no such student')[1]
+ 
+ # 12.12 COMPUTE ALL STRING DECOMPOSITIONS
+def string_decomposition(sentence, words):
+	word_len = len(words[0])
+	phrase_len = len(",".join(words))
+	starting_idxs = []
+	for i, char in enumerate(sentence):
+		words_to_match = collections.Counter(words)
+		start_idx = i
+		while words_to_match:
+			phrase = sentence[start_idx:start_idx+word_len]
+			if phrase not in words_to_match:
+				break
+			else:
+				words_to_match[phrase] -= 1
+				if words_to_match[phrase] == 0:
+					del words_to_match[phrase]
+				start_idx += word_len
+		if not words_to_match:
+			starting_idxs.append(i)
+	return starting_idxs
+
+def find_all_substrings(s, words):
+	def match_all_words_in_dict_BOOK(start):
+		curr_string_to_freq = collections.Counter()
+		for i in range(start, start + len(words) * unit_size, unit_size):
+			curr_word = s[i:i + unit_size]
+			it = word_to_freq[curr_word]
+			if it == 0:
+				return False
+			currn_string_to_freq[curr_word] += 1
+			if cur_string_to_freq[curr_word] > it:
+				return False
+		return True
+
+	word_to_freq = collections.Counter(words)
+	unit_size = len(words[0])
+	return [
+		i for i in range(len(s) - unit_size * len(words) + 1)
+		if match_all_words_in_dict(i)
+	]
+
+# 12.3 TEST THE COLLATZ CONJECTURE
+def collatz(n):
+	proven_nums = set()
+	def prove_num(m):
+		while m > 1:
+			if m in proven_nums:
+				return True
+			else:
+				if m % 2 != 0:
+					m = m * 3 + 1
+				else:
+					m = m // 2
+		if m == 1:
+			return True
+
+	for i in range(1, n+1):
+		if prove_num(i):
+			proven_nums.add(i)
+			print(proven_nums)
+
+def test_collatz_conjecture(n):
+	verified_numbers = set()
+
+	for i in range(3, n+1):
+		test_i = i
+		while test_i >= i:
+			if test_i in sequence:
+				return False
+			sequence.add(test_i)
+
+		if test_i % 2:
+			if test_i in verified_numbers:
+				break
+			verified_numbers.add(test_i)
+			test_i = 3 * test_i + 1
+		else:
+			test_i //= 2
+	return True
+	
+
 
 if __name__ == "__main__":
-	letters = ['f', 's', 'f', 'e', 't', 'w', 'e', 'n', 'w', 'e']
-	print(longest_distinct_subarray(letters))
-	print(longest_subarray_with_distinct_entries(letters))
+	# sentence = "amancancananacanaplal"
+	# words = ['can', 'can', 'ana']
+	# print(string_decomposition(sentence, words))
+	collatz(120)
+	# score_data = ["angi 67", "angi 95", "angi 10", "angi 98", "bab 100", "bab 65", "arthur 30",
+	# 			  "bab 85", "arthur 10", "julia 67", "arthur 94", "bab 89", "george 80"]
+	# print(get_top_student(score_data))
+	# letters = ['f', 's', 'f', 'e', 't', 'w', 'e', 'n', 'w', 'e']
+	# print(longest_distinct_subarray(letters))
+	# print(longest_subarray_with_distinct_entries(letters))
 	# paragraph = ["what", "the", "fuck", "hello", "banana", "banana", "cucumber", "cat"]
 	# keywords = ["banana", "cat"]
 	# print(find_smallest_sequentially_covering_subset(paragraph, keywords))
