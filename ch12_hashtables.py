@@ -275,6 +275,7 @@ def longest_subarray_with_distinct_entries(A):
 				longest_dup_free_subarray_start_idx = dup_idx + 1
 		most_recent_occurences[a] = i
 	return max(result, len(A)-longest_dup_free_subarray_start_idx)
+	
 # 12.10 FIND LENGTH OF THE LONGEST CONTAINED INTERVAL
 def longest_contained_range(A):
 	unprocessed_entries = set(A)
@@ -353,7 +354,7 @@ def find_all_substrings(s, words):
 		if match_all_words_in_dict(i)
 	]
 
-# 12.3 TEST THE COLLATZ CONJECTURE
+# 12.13 TEST THE COLLATZ CONJECTURE
 def collatz(n):
 	proven_nums = set()
 	def prove_num(m):
