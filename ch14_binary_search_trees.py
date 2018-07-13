@@ -329,7 +329,102 @@ def pair_includes_ancestor_and_descendent_of_m(a, b, mid):
     return search_target(
         middle, b if search_0 is middle else a)
 
+# 14.12 RANGE LOOKUP PROBLEM
+def range_lookup(tree, range):
+    def range_lookup_helper(tree):
+        if not tree:
+            return
+        if range[0] <= tree.data <= range[1]:
+            range_lookup_helper(tree.left)
+            result.append(tree.data)
+            range_lookup_helper(tree.right)
+        elif range[0] > tree.data:
+            range_lookup_helper(tree.right)
+        else:
+            range_lookup_helper(tree.left)
+
+    result = []
+    range_lookup_helper(tree)
+    return result
+
+Interval = collections.namedtuple('Interval', ('left', 'right'))
+def range_lookup_in_bst(tree, interval):
+    def range_lookup_in_bst_helper(tree):
+        if not tree:
+            return
+        if interval.left <= tree.data <= interval.right:
+            range_lookup_in_bst_helper(tree.left)
+            result.append(tree.data)
+            range_lookup_in_bst_helper(tree.right)
+        elif interval.left > tree.data:
+            range_lookup_in_bst_helper(tree.right)
+        else:
+            range_lookup_in_bst_helper(tree.left)
+
+    result = []
+    range_lookup_in_bst_helper(tree)
+    return result
+
+# 14.13 ADD CREDITS
+class ClientCreditsInfo:
+    def __init__(self):
+        self._offset = 0
+        self._clients_to_credits = {}
+        self._credits_to_clients = SortedDict()
+
+    def insert(self, client_id, c):
+        self.remove(client_id)
+        self._clients_to_credits[client_id] = c - self._offset
+        self._clients_to_credits.setdefault(c - self._offset, set()).add(client_id)
+
+    def remove(self, client_id):
+        credit = self._clients_to_credits
+        if credit is not None:
+            self._clients_to_credits[credit].pop(client_id)
+            if not self._clients_to_credits[credit]:
+                del self._credits_to_clients[credit]
+            del self._clients_to_credits[client_id]
+            return True
+        return False
+
+    def lookup(self, client_id):
+        credit = self._clients_to_credits.get(client_id)
+        return -1 if credit is None else credit + self._offset
+
+    def add_all(self, C):
+        self._offset += C
+
+    def max(self):
+        if not self._clients_to_credits:
+            return ''
+        clients = self._clients_to_credits.peekitem(index=0)[1]
+        return '' if not clients else next(iter(clients))
+
+
 if __name__ == "__main__":
+    node16 = TreeNode(31)
+    node15 = TreeNode(41)
+    node14 = TreeNode(29, None, node16)
+    node13 = TreeNode(13)
+    node12 = TreeNode(53)
+    node11 = TreeNode(37, node14, node15)
+    node10 = TreeNode(17, node13, None)
+    node9 = TreeNode(5)
+    node8 = TreeNode(2)
+    node7 = TreeNode(47, None, node12)
+    node6 = TreeNode(23, None, node11)
+    node5 = TreeNode(11, None, node10)
+    node4 = TreeNode(3, node8, node9)
+    node3 = TreeNode(43, node6, node7)
+    node2 = TreeNode(7, node4, node5)
+    root = TreeNode(19, node2, node3)
+
+    interval = Interval(16, 37)
+
+    print(range_lookup(root, interval))
+    print(range_lookup_in_bst(root, interval))
+
+
     # node11 = TreeNode(5)
     # node10 = TreeNode(3)
     # node9 = TreeNode(1)
@@ -345,11 +440,11 @@ if __name__ == "__main__":
     # stream = ['c', 'd', 'e', 'a', 'a', 'a', 'a', 'c', 'd', 'c', 'd', 'e', 'g', 'f', 'a', 'd', 'c']
     # print(k_most_visited(stream, 3))
 
-    arr = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-    min_height_tree = build_min_height_bst(arr)
-    max_height_tree = build_max_height_bst(arr)
-    print(get_max_tree_height(min_height_tree))
-    print(get_max_tree_height(max_height_tree))
+    # arr = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    # min_height_tree = build_min_height_bst(arr)
+    # max_height_tree = build_max_height_bst(arr)
+    # print(get_max_tree_height(min_height_tree))
+    # print(get_max_tree_height(max_height_tree))
 
 
     # sorted_arrays = [[5,10,15], [3,6,8,12,14], [8,16,24]]
